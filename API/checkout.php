@@ -2,6 +2,8 @@
 // File: API/checkout.php
 require_once("config.php");
 require_once("../db_pdo.php");
+/** @var PDO $conn */  // <--- Thêm dòng này vào để báo cho VS Code biết $conn là gì
+session_start();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -15,6 +17,8 @@ if (!$input || empty($input['cart'])) {
     echo json_encode(["message" => "Dữ liệu không hợp lệ"]);
     exit;
 }
+
+$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
 try {
     $conn->beginTransaction();
@@ -48,8 +52,8 @@ try {
     $payment_method = isset($input['payment_method']) ? $input['payment_method'] : 'COD';
 
     // 3. Tạo Đơn hàng
-    $sqlOrder = "INSERT INTO orders (customer_name, customer_email, customer_phone, customer_address, total_money, shipping_fee, payment_method, payment_status) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, 0)"; // 0 = Chưa thanh toán
+    $sqlOrder = "INSERT INTO orders (user_id, customer_name, customer_email, customer_phone, customer_address, total_money, shipping_fee, payment_method, payment_status) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)"; // 0 = Chưa thanh toán
     $stmtOrder = $conn->prepare($sqlOrder);
 
     // Sanitize
@@ -58,7 +62,7 @@ try {
     $phone = htmlspecialchars(strip_tags($input['customer_phone']));
     $addr = htmlspecialchars(strip_tags($input['customer_address']));
 
-    $stmtOrder->execute([$name, $email, $phone, $addr, $final_total, $shipping_fee, $payment_method]);
+    $stmtOrder->execute([$user_id, $name, $email, $phone, $addr, $final_total, $shipping_fee, $payment_method]);
     $order_id = $conn->lastInsertId();
 
     // 4. Tạo chi tiết đơn hàng & TRỪ TỒN KHO

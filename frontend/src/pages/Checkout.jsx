@@ -23,7 +23,8 @@ export default function Checkout() {
 
         try {
             // 1. Tạo đơn hàng
-            const res = await axios.post(`${API_URL}/checkout.php`, orderData);
+            const res = await axios.post(`${API_URL}/checkout.php`, orderData, { withCredentials: true });
+
 
             if (res.data.status === 'success') {
                 const orderId = res.data.order_id;

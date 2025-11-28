@@ -1,27 +1,22 @@
 <?php
-$host = "localhost";
-$user = "root";
-$pwd = "root";
-$db = "t2507e_db";
+// 1. Nhúng file kết nối chuẩn PDO (đã cấu hình sẵn trong db_pdo.php)
+require_once("db_pdo.php");
 
-$conn = new mysqli($host, $user, $pwd, $db);
-if ($conn->connect_error) {
-    die("Connect database fail!");
-}
-
-// Join bảng products và categories để lấy tên danh mục
+// 2. Viết câu SQL (Giữ nguyên logic cũ)
 $sql = "SELECT products.*, categories.name as category_name 
-            FROM products 
-            LEFT JOIN categories ON products.category_id = categories.id";
+        FROM products 
+        LEFT JOIN categories ON products.category_id = categories.id";
 
-$rs = $conn->query($sql);
-$data = [];
-if ($rs && $rs->num_rows > 0) {
-    while ($row = $rs->fetch_assoc()) {
-        $data[] = $row;
-    }
-}
+// 3. Thực thi query bằng PDO
+// $conn ở đây được lấy từ bên trong file db_pdo.php
+$stmt = $conn->query($sql);
+
+// 4. Lấy toàn bộ dữ liệu ra mảng
+// fetchAll() sẽ trả về mảng các dòng dữ liệu, giống hệt biến $data cũ
+$data = $stmt->fetchAll();
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
